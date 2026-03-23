@@ -19,7 +19,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/admin/dish")
-@Api(tags = "菜品相关道具")
+@Api(tags = "菜品相关接口")
 @Slf4j
 public class DishController {
 
@@ -88,6 +88,18 @@ public class DishController {
         return Result.success();
     }
 
+    /**
+     * 更新菜品状态
+     * @param status
+     * @return
+     */
+    @PostMapping("/status/{status}")
+    @ApiOperation("更新菜品状态")
+    public Result updateStatus(@PathVariable Integer status, @RequestParam Long id) {
+        log.info("更新菜品状态为,{}",status);
+        dishService.updateStatus(status,id);
+        return Result.success();
+    }
 
 
 }

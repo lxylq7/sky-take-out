@@ -8,6 +8,7 @@ import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
 import com.sky.entity.Dish;
 import com.sky.entity.DishFlavor;
+import com.sky.entity.Setmeal;
 import com.sky.exception.DeletionNotAllowedException;
 import com.sky.mapper.DishFlavorMapper;
 import com.sky.mapper.DishMapper;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -136,6 +138,39 @@ public class DishServiceImpl implements DishService {
                 dishFlavor.setDishId(dishDTO.getId());
             });
             dishFlavorMapper.insertBatch(flavors);
+        }
+
+    }
+
+    /**
+     * 更新菜品状态
+     * @param status
+     */
+    @Override
+    public void updateStatus(Integer status,Long id) {
+        //需要根据id更改状态
+        Dish dish = Dish.builder()
+                        .id(id)
+                        .status(status)
+                        .build();
+        dishMapper.update(dish);
+        //菜品停售了 同时套餐也要停售
+        //判断是否是停售操作
+        if (status == StatusConstant.DISABLE){
+            //判断是否有套餐 创建一个集合
+            ArrayList<Long> ids = new ArrayList<>();
+            ids.add(id);
+            List<Long> setMealDishIds = setMealDishMapper.getSetMealDishIds(ids);
+            if (setMealDishIds != null && setMealDishIds.size() > 0) {
+                //能进来说明有套餐关联 需要停用对应套餐 可能存在多个套餐
+                for (Long setMealId : setMealDishIds) {
+                    Setmeal setMeal = Setmeal.builder()
+                            .id(setMealId)
+                            .status(status)
+                            .build();
+                    setMealDishMapper.update(setMeal);
+                }
+            }
         }
 
     }
