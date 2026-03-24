@@ -122,4 +122,30 @@ public class SetMealServiceImpl implements SetMealService {
         });
         setMealDishMapper.insertBatch(setmealDishs);
     }
+
+    /**
+     * 更新套餐状态
+     * @param id
+     * @param status
+     */
+    @Override
+    public void updateStatus(Long id, Integer status) {
+        //起售套餐时候 查看是否有菜品停售 如果有 不能起售
+        if (status == StatusConstant.ENABLE) {
+            //通过id查询菜品 id是套餐id
+            List<Dish> dishes = dishMapper.selectBySetmealId(id);
+            dishes.forEach(dish -> {
+                if (dish.getStatus() == StatusConstant.DISABLE){
+                    throw new DeletionNotAllowedException(MessageConstant.SETMEAL_ENABLE_FAILED);
+                }
+            });
+        }
+        Setmeal setmeal = Setmeal.builder()
+                .status(status)
+                .id(id)
+                .build();
+        setMealMapper.update(setmeal);
+    }
+
+
 }

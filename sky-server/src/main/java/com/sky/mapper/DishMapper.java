@@ -80,4 +80,12 @@ public interface DishMapper {
      * @return
      */
     List<Dish> list(Dish dish);
+
+    /**
+     * 根据套餐id查询菜品
+     * @param dishId
+     */
+    //@Select("select * from dish a left join setmeal_dish b on a.id = b.dish_id where b.setmeal_id = #{dishId}")
+    @Select("select * from dish where id in (select dish_id from setmeal_dish where setmeal_id=#{dishId}) ")
+    List<Dish> selectBySetmealId(Long dishId);
 }
