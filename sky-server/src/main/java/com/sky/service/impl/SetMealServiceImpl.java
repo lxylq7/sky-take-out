@@ -34,8 +34,6 @@ public class SetMealServiceImpl implements SetMealService {
     private SetMealDishMapper setMealDishMapper;
     @Autowired
     private DishMapper dishMapper;
-    @Autowired
-    private SetMealService setMealService;
 
     /**
      * 新增套餐
