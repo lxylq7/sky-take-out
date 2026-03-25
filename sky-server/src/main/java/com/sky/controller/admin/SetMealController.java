@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
+@RestController("adminSetMealController")
 @RequestMapping("/admin/setmeal")
 @Slf4j
 @Api(tags = "套餐管理")

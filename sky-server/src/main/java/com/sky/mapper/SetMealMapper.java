@@ -11,8 +11,11 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.List;
+
 @Mapper
 public interface SetMealMapper {
+
 
     /**
      * 新增套餐
@@ -48,4 +51,11 @@ public interface SetMealMapper {
      * @param setmeal
      */
     void update(Setmeal setmeal);
+
+    /**
+     * 查询套餐列表
+     * @param setmeal
+     * @return
+     */
+    List<Setmeal> list(Setmeal setmeal);
 }

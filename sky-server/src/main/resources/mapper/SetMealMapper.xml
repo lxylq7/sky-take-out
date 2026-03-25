@@ -19,8 +19,12 @@
             <if test="description != null">description = #{description},</if>
             <if test="image != null">image = #{image},</if>
         </set>
-
+        <where>
+            id = #{id}
+        </where>
     </update>
+
+
 
     <select id="pageQuery" resultType="com.sky.vo.SetmealVO">
         select s.*,c.name categoryName from setmeal s
@@ -33,4 +37,14 @@
         </where>
         order by s.create_time desc
     </select>
+
+    <select id="list" resultType="com.sky.entity.Setmeal">
+        select * from setmeal
+        <where>
+            <if test="name != null and name != ''">and name like concat('%',#{name},'%')</if>
+            <if test="categoryId != null">and category_id = #{categoryId}</if>
+            <if test="status != null">and status = #{status}</if>
+        </where>
+    </select>
+
 </mapper>
