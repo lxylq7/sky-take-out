@@ -1,5 +1,6 @@
 package com.sky.service.impl;
 
+import com.alibaba.fastjson.serializer.BeanContext;
 import com.sky.context.BaseContext;
 import com.sky.dto.ShoppingCartDTO;
 import com.sky.entity.Dish;
@@ -65,5 +66,14 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
             shoppingCart.setCreateTime(LocalDateTime.now());
             shoppingCartMapper.insert(shoppingCart);
         }
+    }
+
+    @Override
+    public List<ShoppingCart> showShoppingList() {
+        Long currentId = BaseContext.getCurrentId();
+        ShoppingCart shoppingCart = new ShoppingCart();
+        shoppingCart.setUserId(currentId);
+        List<ShoppingCart> shoppingCartsList = shoppingCartMapper.list(shoppingCart);
+        return shoppingCartsList;
     }
 }
