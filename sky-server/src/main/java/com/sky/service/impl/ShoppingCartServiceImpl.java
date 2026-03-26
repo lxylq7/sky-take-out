@@ -68,6 +68,10 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         }
     }
 
+    /**
+     * 显示购物车列表
+     * @return
+     */
     @Override
     public List<ShoppingCart> showShoppingList() {
         Long currentId = BaseContext.getCurrentId();
@@ -75,5 +79,56 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         shoppingCart.setUserId(currentId);
         List<ShoppingCart> shoppingCartsList = shoppingCartMapper.list(shoppingCart);
         return shoppingCartsList;
+    }
+
+    /**
+     * 清空购物车
+     */
+    @Override
+    public void clean() {
+        Long userId = BaseContext.getCurrentId();
+        shoppingCartMapper.clean(userId);
+    }
+
+    /**
+     * 删除购物车
+     * @param shoppingCartDTO
+     */
+    @Override
+    public void delete(ShoppingCartDTO shoppingCartDTO) {
+        Long dishId = shoppingCartDTO.getDishId();
+        Long setmealId = shoppingCartDTO.getSetmealId();
+        Long userId = BaseContext.getCurrentId();
+        if (dishId == null) {
+            //删除的是套餐 通过套餐id查询购物车中该套餐信息
+            ShoppingCart shoppingCartSetmeal = shoppingCartMapper.getBySetmealId(setmealId,userId);
+            //防止空指针异常
+            if (shoppingCartSetmeal == null ){
+                return;
+            }
+            Integer setmealNumber = shoppingCartSetmeal.getNumber();
+            if (setmealNumber > 1) {
+                shoppingCartSetmeal.setNumber(setmealNumber-1);
+                shoppingCartMapper.update(shoppingCartSetmeal);
+            } else {
+                //删除整个套餐
+                shoppingCartMapper.delete(shoppingCartSetmeal);
+            }
+        } else {
+            //删除的是菜品
+            ShoppingCart shoppingCartDish = shoppingCartMapper.getByDishId(dishId,userId);
+            //防止空指针异常
+            if (shoppingCartDish == null ){
+                return;
+            }
+            Integer dishNumber = shoppingCartDish.getNumber();
+            if (dishNumber > 1) {
+                shoppingCartDish.setNumber(dishNumber-1);
+                shoppingCartMapper.update(shoppingCartDish);
+            } else {
+                //删除整个菜品
+                shoppingCartMapper.delete(shoppingCartDish);
+            }
+        }
     }
 }
