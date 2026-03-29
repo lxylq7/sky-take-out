@@ -116,5 +116,56 @@ public class ReportServiceImpl implements ReportService {
                 .build();
     }
 
+    /**
+     * 统计指定时间区间内的用户数据
+     * @param begin
+     * @param end
+     * @return
+     */
+    public OrderReportVO getOrderStatistics(LocalDate begin, LocalDate end) {
+        List<LocalDate> dateList = new ArrayList<>();
+        dateList.add(begin);
+        while (!begin.equals(end)) {
+            begin = begin.plusDays(1);
+            dateList.add(begin);
+        }
+        //存放每天的订单总数
+        List<Integer> orderCountList = new ArrayList<>();
+        //存放每天的有效订单数
+        List<Integer> validOrderCountList = new ArrayList<>();
+        for (LocalDate localDate : dateList) {
+            LocalDateTime beginTime = LocalDateTime.of(localDate, LocalTime.MIN);
+            LocalDateTime endTime = LocalDateTime.of(localDate, LocalTime.MAX);
+            Integer orderCount = getOrderCountByMap(beginTime, endTime, null);
+            Integer validOrderCount = getOrderCountByMap(beginTime, endTime, Orders.COMPLETED);
+            orderCountList.add(orderCount);
+            validOrderCountList.add(validOrderCount);
+        }
+        Integer totalOrderCount =  orderCountList.stream().reduce(Integer::sum).get();
+        Integer validOrderCount =  validOrderCountList.stream().reduce(Integer::sum).get();
+        Double orderCompletionRate = 0.0;
+        if (totalOrderCount > 0) {
+            //计算订单完成率
+            orderCompletionRate = validOrderCount.doubleValue() / totalOrderCount;
+        }
+        return OrderReportVO.builder()
+                .dateList(StringUtils.join(dateList,","))
+                .orderCountList(StringUtils.join(orderCountList,","))
+                .validOrderCountList(StringUtils.join(validOrderCountList,","))
+                .totalOrderCount(totalOrderCount)
+                .validOrderCount(validOrderCount)
+                .orderCompletionRate(orderCompletionRate)
+                .build();
+    }
+
+    public Integer getOrderCountByMap(LocalDateTime begin, LocalDateTime end,Integer status) {
+        Map map = new HashMap();
+        map.put("begin",begin);
+        map.put("end",end);
+        map.put("status",status);
+        return orderMapper.countByMap(map);
+
+    }
+
 
 }
