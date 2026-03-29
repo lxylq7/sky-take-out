@@ -31,5 +31,13 @@ public interface OrderMapper {
      */
     void update(Orders orders);
 
+
+    /**
+     * 查询超时订单
+     * @return
+     */
+    @Select("select * from orders where status = #{status} and order_time < #{orderTime}")
+    List<Orders> selectByStatusAndOrderTime(Integer status, LocalDateTime orderTime);
+
 }
 
