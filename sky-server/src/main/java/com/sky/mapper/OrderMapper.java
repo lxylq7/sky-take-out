@@ -59,5 +59,12 @@ public interface OrderMapper {
      */
     @Select("select count(id) from orders where status = #{status}")
     Integer countStatus(Integer status);
+
+    /**
+     * 根据条件统计订单金额
+     * @param map
+     * @return
+     */
+    Double sumByMap(Map map);
 }
 

@@ -55,7 +55,6 @@ public class OrderServiceImpl implements OrderService {
     private WeChatPayUtil weChatPayUtil;
     @Autowired
     private WebSocketServer webSocketServer;
-
     /**
 
      * 用户下单
@@ -177,7 +176,7 @@ public class OrderServiceImpl implements OrderService {
         orderMapper.update(orders);
         //通过websocket通知客户端订单状态更新
         Map map = new HashMap<>();
-        map.put("type",1);
+        map.put("type",1); //1来单提醒 2客户催单
         map.put("orderId",orders.getId());
         map.put("comtent","订单号"+outTradeNo);
         String json = JSON.toJSONString(map);
@@ -514,5 +513,18 @@ public class OrderServiceImpl implements OrderService {
         orders.setDeliveryTime(LocalDateTime.now());
 
         orderMapper.update(orders);
+    }
+
+    @Override
+    public void reminder(Long id) {
+        Orders ordersDB = orderMapper.getById(id);
+        if (ordersDB == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+        Map map = new HashMap<>();
+        map.put("type",2);
+        map.put("orderId", id);
+        map.put("content", ordersDB.getNumber());
+        webSocketServer.sendToAllClient(JSON.toJSONString(map));
     }
 }
