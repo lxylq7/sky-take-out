@@ -5,6 +5,7 @@ import com.sky.dto.GoodsSalesDTO;
 import com.sky.entity.Orders;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.UserMapper;
+import com.sky.service.WorkspaceService;
 import com.sky.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -35,6 +36,8 @@ public class   ReportServiceImpl implements ReportService {
     private OrderMapper orderMapper;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private WorkspaceService workspaceService;
     /**
      * 统计指定时间区间内的营业额数据
      *
@@ -116,10 +119,72 @@ public class   ReportServiceImpl implements ReportService {
                 .build();
     }
 
+    /**
+     * 统计指定时间区间内的销量排名数据
+     * @param begin
+     * @param end
+     * @return
+     */
     @Override
     public SalesTop10ReportVO getTop10Sales(LocalDate begin, LocalDate end) {
+        LocalDateTime beginTime = LocalDateTime.of(begin, LocalTime.MIN);
+        LocalDateTime endTime = LocalDateTime.of(end, LocalTime.MAX);
 
-        return null;
+        List<GoodsSalesDTO> salesTop10 = orderMapper.getSales(beginTime, endTime);
+        List<String> names = salesTop10.stream().map(GoodsSalesDTO::getName).collect(Collectors.toList());
+        String nameList = StringUtils.join(names, ",");
+
+        List<Integer> numbers = salesTop10.stream().map(GoodsSalesDTO::getNumber).collect(Collectors.toList());
+        String numberList = StringUtils.join(numbers, ",");
+
+        //封装返回结果数据
+        return SalesTop10ReportVO
+                .builder()
+                .nameList(nameList)
+                .numberList(numberList)
+                .build();
+    }
+
+    @Override
+    public void exportBuisnessDate(HttpServletResponse response) {
+        LocalDate dateBegin = LocalDate.now().minusDays(30);
+        LocalDate dateEnd = LocalDate.now();
+        //查询数据库
+        BusinessDataVO bu = workspaceService.getBusinessData(LocalDateTime.of(dateBegin, LocalTime.MIN), LocalDateTime.of(dateEnd, LocalTime.MAX));
+        //通过poi将数据写入到Excel文件中
+        InputStream in = this.getClass().getClassLoader().getResourceAsStream("template/运营数据报表模板.xlsx");
+        try {
+            XSSFWorkbook excel = new XSSFWorkbook(in);
+            //填充数据
+            XSSFSheet sheet = excel.getSheet("sheet1");
+            sheet.getRow(1).getCell(1).setCellValue("时间"+dateBegin+"至"+dateEnd);
+            //获得第4行
+            XSSFRow row = sheet.getRow(3);
+            row.getCell(2).setCellValue(bu.getTurnover());
+            row.getCell(4).setCellValue(bu.getOrderCompletionRate());
+            row.getCell(6).setCellValue(bu.getNewUsers());
+            //获得第5行
+            row = sheet.getRow(4);
+            row.getCell(2).setCellValue(bu.getValidOrderCount());
+            row.getCell(4).setCellValue(bu.getUnitPrice());
+            //填充明细数据
+            for (int i = 0; i < 30; i++) {
+                //查询某一日营业数据
+                LocalDate date = dateBegin.plusDays(i);
+                BusinessDataVO businessData = workspaceService.getBusinessData(LocalDateTime.of(dateBegin.plusDays(i), LocalTime.MIN), LocalDateTime.of(dateBegin.plusDays(i), LocalTime.MAX));
+                //获得某一行
+                row = sheet.getRow(7+i);
+                row.getCell(1).setCellValue(date.toString());
+                row.getCell(2).setCellValue(businessData.getTurnover());
+                row.getCell(3).setCellValue(businessData.getValidOrderCount());
+                row.getCell(4).setCellValue(businessData.getOrderCompletionRate());
+                row.getCell(5).setCellValue(businessData.getUnitPrice());
+                row.getCell(6).setCellValue(businessData.getNewUsers());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**
@@ -179,6 +244,12 @@ public class   ReportServiceImpl implements ReportService {
         return orderMapper.countByMap(map);
     }
 
+    /**
+     * 统计指定时间区间内的销量排名数据
+     * @param begin
+     * @param end
+     * @return
+     */
     public SalesTop10ReportVO getTop10SalesByMap(LocalDate begin, LocalDate end) {
         LocalDateTime beginTime = LocalDateTime.of(begin, LocalTime.MIN);
         LocalDateTime endTime = LocalDateTime.of(end, LocalTime.MAX);

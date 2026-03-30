@@ -33,4 +33,10 @@ public interface ReportService {
      * @return
      */
     SalesTop10ReportVO getTop10Sales(LocalDate begin, LocalDate end);
+
+    /**
+     * 导出指定时间区间内的业务数据
+     * @param response
+     */
+    void exportBuisnessDate(HttpServletResponse response);
 }

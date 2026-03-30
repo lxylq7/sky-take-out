@@ -75,5 +75,13 @@ public class ReportController {
         return Result.success(reportService.getTop10Sales(begin,end));
     }
 
-
+    /**
+     * 导出数据
+     * @param response
+     */
+    @GetMapping("/export")
+    @ApiOperation("导出数据")
+    public void export(HttpServletResponse response){
+        reportService.exportBuisnessDate(response);
+    }
 }
