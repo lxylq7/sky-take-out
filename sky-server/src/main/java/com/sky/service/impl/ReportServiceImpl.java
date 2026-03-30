@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class ReportServiceImpl implements ReportService {
+public class   ReportServiceImpl implements ReportService {
 
     @Autowired
     private OrderMapper orderMapper;
@@ -116,6 +116,12 @@ public class ReportServiceImpl implements ReportService {
                 .build();
     }
 
+    @Override
+    public SalesTop10ReportVO getTop10Sales(LocalDate begin, LocalDate end) {
+
+        return null;
+    }
+
     /**
      * 统计指定时间区间内的用户数据
      * @param begin
@@ -158,14 +164,35 @@ public class ReportServiceImpl implements ReportService {
                 .build();
     }
 
+    /**
+     * 统计指定时间区间内的订单数量
+     * @param begin
+     * @param end
+     * @param status
+     * @return
+     */
     public Integer getOrderCountByMap(LocalDateTime begin, LocalDateTime end,Integer status) {
         Map map = new HashMap();
         map.put("begin",begin);
         map.put("end",end);
         map.put("status",status);
         return orderMapper.countByMap(map);
-
     }
 
-
+    public SalesTop10ReportVO getTop10SalesByMap(LocalDate begin, LocalDate end) {
+        LocalDateTime beginTime = LocalDateTime.of(begin, LocalTime.MIN);
+        LocalDateTime endTime = LocalDateTime.of(end, LocalTime.MAX);
+        List<GoodsSalesDTO> goodsSalesDTOList = orderMapper.getSales(beginTime, endTime);
+        List<String> listName = goodsSalesDTOList.stream()
+                .map(GoodsSalesDTO::getName).collect(Collectors.toList());
+        String nameList = StringUtils.join(listName, ",");
+        List<Integer> listNumber = goodsSalesDTOList.stream()
+                .map(GoodsSalesDTO::getNumber).collect(Collectors.toList());
+        String numberList = StringUtils.join(listNumber, ",");
+        return SalesTop10ReportVO
+                .builder()
+                .nameList(nameList)
+                .numberList(numberList)
+                .build();
+    }
 }

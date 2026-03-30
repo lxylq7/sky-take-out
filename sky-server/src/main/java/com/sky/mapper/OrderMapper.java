@@ -73,5 +73,13 @@ public interface OrderMapper {
      * @return
      */
     Integer countByMap(Map map);
+
+    /**
+     * 统计指定时间区间内的商品销售数据
+     * @param begin
+     * @param end
+     * @return
+     */
+    List<GoodsSalesDTO> getSales(LocalDateTime begin, LocalDateTime end);
 }
 

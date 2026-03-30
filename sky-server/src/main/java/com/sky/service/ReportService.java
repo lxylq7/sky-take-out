@@ -25,4 +25,12 @@ public interface ReportService {
      * @return
      */
     UserReportVO getUserStatistics(LocalDate begin, LocalDate end);
+
+    /**
+     * 统计指定时间区间内的销量排名数据
+     * @param begin
+     * @param end
+     * @return
+     */
+    SalesTop10ReportVO getTop10Sales(LocalDate begin, LocalDate end);
 }
