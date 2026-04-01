@@ -25,7 +25,6 @@
     </update>
 
 
-
     <select id="pageQuery" resultType="com.sky.vo.SetmealVO">
         select s.*,c.name categoryName from setmeal s
         left outer join

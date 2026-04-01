@@ -144,7 +144,6 @@ public class   ReportServiceImpl implements ReportService {
                 .numberList(numberList)
                 .build();
     }
-
     @Override
     public void exportBuisnessDate(HttpServletResponse response) {
         LocalDate dateBegin = LocalDate.now().minusDays(30);

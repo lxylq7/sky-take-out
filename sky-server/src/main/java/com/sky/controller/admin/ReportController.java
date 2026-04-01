@@ -42,6 +42,7 @@ public class ReportController {
             @DateTimeFormat(pattern = "yyyy-MM-dd")  LocalDate begin,
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end){
         log.info("营业额数据统计：{},{}",begin,end);
+        System.out.println("需要多少不计其数");
         return Result.success(reportService.getTurnoverStatistics(begin,end));
     }
 
